@@ -4,6 +4,7 @@ import { GenericOrmClient } from '../../generic-orm-client'
 import type { ModelAttributeFieldNumber } from '../../model/model-domain'
 import { QueryModel } from '../../model/query-model'
 import type { RepositoryQueryConverter } from '../../repository/repository-query-converter'
+import { OptimisticLockConflictError } from '../../repository/repository-errors'
 import type { Aggregation, Filter, FilterGroup, Join, PaginationResult, SubQueryClause, WhereClause } from '../../types'
 
 type AnyModelClass = ModelClass<Model>
@@ -29,6 +30,7 @@ export interface ObjectionSubQueryResolverContext {
 
 export interface ObjectionClientOptions<DomainQueryModel extends object = object> {
   paranoidField?: string | keyof DomainQueryModel
+  versionField?: string | keyof DomainQueryModel
   resolveSubQueryModel?: (context: ObjectionSubQueryResolverContext) => AnyModelClass | undefined
 }
 
@@ -659,6 +661,11 @@ export class ObjectionClient<
   ): Promise<void> {
     const patch = this.omitIdentifierFields(model) as PartialModelObject<PersistenceModel>
 
+    if (this.options.versionField) {
+      await this.updateWithOptimisticLock(model, patch, query)
+      return
+    }
+
     if (query) {
       await query.createBuilder().patch(patch)
       return
@@ -666,6 +673,53 @@ export class ObjectionClient<
 
     const id = this.extractIdentifier(model)
     await this.modelClass.query(this.trx).patchAndFetchById(id, patch)
+  }
+
+  private async updateWithOptimisticLock(
+    model: Partial<PersistenceModel>,
+    patch: PartialModelObject<PersistenceModel>,
+    query?: ObjectionQuery<PersistenceModel, DomainQueryModel>
+  ): Promise<void> {
+    const versionProp = String(this.options.versionField)
+    const currentVersion = (model as Record<string, unknown>)[versionProp]
+
+    if (currentVersion === undefined || currentVersion === null) {
+      throw new Error(
+        `ObjectionClient requires the version field "${versionProp}" to be present for optimistic locking`
+      )
+    }
+
+    const versionColumn = this.modelClass.propertyNameToColumnName(versionProp)
+    const nextVersion = (currentVersion as number) + 1
+    const patchWithVersion = { ...patch, [versionProp]: nextVersion }
+
+    let numUpdated: number
+
+    if (query) {
+      numUpdated = await query.createBuilder().patch(patchWithVersion)
+    } else {
+      const id = this.extractIdentifier(model)
+      const idColumns = this.getIdColumns()
+      let builder = this.modelClass
+        .query(this.trx)
+        .patch(patchWithVersion as PartialModelObject<PersistenceModel>)
+
+      if (Array.isArray(id)) {
+        idColumns.forEach((col, i) => {
+          builder = builder.where(col, (id as Array<string | number | bigint | Buffer>)[i] as string | number)
+        })
+      } else {
+        builder = builder.where(idColumns[0], id as string | number)
+      }
+
+      numUpdated = await builder.where(versionColumn, currentVersion as string | number)
+    }
+
+    if (numUpdated === 0) {
+      throw new OptimisticLockConflictError(
+        `ObjectionClient optimistic lock conflict: record was modified by another process (version ${String(currentVersion)})`
+      )
+    }
   }
 
   async upsert(model: PersistenceModel, query?: ObjectionQuery<PersistenceModel, DomainQueryModel>): Promise<void> {
