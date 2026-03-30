@@ -42,3 +42,17 @@ export class RepositoryMappingError extends RepositoryError {
     this.name = new.target.name
   }
 }
+
+export class OptimisticLockConflictError extends RepositoryExecutionError {
+  constructor(message: string, options?: { cause?: unknown; context?: RepositoryErrorContext }) {
+    super(message, options)
+    this.name = new.target.name
+  }
+}
+
+export class TransactionError extends RepositoryExecutionError {
+  constructor(message: string, options?: { cause?: unknown; context?: RepositoryErrorContext }) {
+    super(message, options)
+    this.name = new.target.name
+  }
+}

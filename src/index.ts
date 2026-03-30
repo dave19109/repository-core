@@ -43,10 +43,12 @@ export type {
   RepositoryWriter
 } from './repository/repository-contracts'
 export {
+  OptimisticLockConflictError,
   RepositoryError,
   RepositoryExecutionError,
   RepositoryMappingError,
-  RepositoryQueryBuildError
+  RepositoryQueryBuildError,
+  TransactionError
 } from './repository/repository-errors'
 export type { RepositoryQueryConverter } from './repository/repository-query-converter'
 export { IdentityRepositoryQueryConverter } from './repository/repository-query-converter'
