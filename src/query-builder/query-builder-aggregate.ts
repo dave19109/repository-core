@@ -1,10 +1,10 @@
-import type { EmptyRelationshipMap, ModelAttributeField, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap, ModelAttributeField } from '../model/model-domain'
 import type { AggregateField, AggregateFunction, Aggregation } from '../types'
 import { BaseQueryBuilder } from './base-query-builder'
 
 export class QueryBuilderAggregate<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   /**
    * Adds a MAX aggregate selection.

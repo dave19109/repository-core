@@ -3,7 +3,7 @@ import type { Model, ModelClass, ModelObject } from 'objection'
 import type { RetryPolicy } from '../../concurrency/retry'
 import { withRetry } from '../../concurrency/retry'
 import { wrapIfSerializationError } from '../../concurrency/transaction'
-import type { EmptyRelationshipMap, RelationshipDefinitions } from '../../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap } from '../../model/model-domain'
 import { GenericOrmRepository } from '../../repository/generic-orm-repository'
 import { ObjectionClient } from './object-client'
 import type { ObjectionQuery } from './types'
@@ -15,7 +15,7 @@ import type { ObjectionQuery } from './types'
 export abstract class ObjectionRepository<
   M extends Model,
   D extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends GenericOrmRepository<ModelObject<M>, D, M, Rel, ObjectionQuery<M, ModelObject<M>>> {
   constructor(modelClass: ModelClass<M>) {
     super(

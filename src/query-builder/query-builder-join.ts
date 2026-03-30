@@ -1,8 +1,8 @@
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ExtractRelationshipFields,
-  ExtractRelationshipTargetModel,
-  RelationshipDefinitions
+  ExtractRelationshipTargetModel
 } from '../model/model-domain'
 import type { QueryModel } from '../model/query-model'
 import type { JoinType } from '../types'
@@ -22,7 +22,7 @@ export type JoinQueryInput<Model extends object = object> = JoinQueryStateCarrie
 
 export class QueryBuilderJoin<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   /**
    * Joins a relationship to the query.

@@ -2,6 +2,7 @@ export type { RetryPolicy } from './concurrency'
 export { runInTransaction } from './concurrency'
 export { GenericOrmClient } from './generic-orm-client'
 export type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ExtractRelationshipFields,
   ModelAttributeField,

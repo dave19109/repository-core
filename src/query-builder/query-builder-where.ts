@@ -1,8 +1,8 @@
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ModelAttributeField,
-  ModelAttributeValue,
-  RelationshipDefinitions
+  ModelAttributeValue
 } from '../model/model-domain'
 import { QueryModel } from '../model/query-model'
 import type {
@@ -18,7 +18,7 @@ import { BaseQueryBuilder } from './base-query-builder'
 import type { QueryBuilder } from './query-builder'
 import { QueryBuilderBase } from './query-builder-base'
 
-export type WhereCallback<Model extends object = object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> = (
+export type WhereCallback<Model extends object = object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> = (
   builder: QueryBuilderWhere<Model, Rel>
 ) => QueryBuilderWhere<Model, Rel>
 
@@ -33,7 +33,7 @@ export type SubQueryInput<Model extends object = object> = SubQueryStateCarrier<
 
 export class QueryBuilderWhere<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   private static readonly NULL_OPERATORS = ['is_null', 'is_not_null'] as const
 

@@ -1,10 +1,10 @@
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ExtractRelationshipFields,
   ExtractRelationshipTargetModel,
   ModelAttributeField,
-  ModelAttributeValue,
-  RelationshipDefinitions
+  ModelAttributeValue
 } from './model/model-domain'
 import type { QueryModel } from './model/query-model'
 
@@ -116,7 +116,7 @@ export type JoinType = 'inner' | 'left' | 'right' | 'full' | 'cross'
 
 export interface Join<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap,
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap,
   R extends ExtractRelationshipFields<M, Rel> = ExtractRelationshipFields<M, Rel>
 > {
   type: JoinType

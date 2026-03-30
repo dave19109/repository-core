@@ -1,8 +1,8 @@
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ModelAttributeField,
-  ModelAttributeFieldNumber,
-  RelationshipDefinitions
+  ModelAttributeFieldNumber
 } from '../model/model-domain'
 import { QueryBuilder } from '../query-builder/query-builder'
 import type { AggregateFunction, PaginationResult } from '../types'
@@ -32,7 +32,7 @@ export abstract class Repository<
   Model extends object,
   DomainRecord extends object = Record<string, any>,
   PersistenceModel extends object = Model,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > implements RepositoryPort<Model, DomainRecord, Rel>
 {
   protected abstract readonly mapper: RepositoryMapper<PersistenceModel, DomainRecord>

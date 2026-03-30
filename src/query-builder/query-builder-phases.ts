@@ -1,10 +1,10 @@
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ExtractRelationshipFields,
   ExtractRelationshipTargetModel,
   ModelAttributeField,
-  ModelAttributeValue,
-  RelationshipDefinitions
+  ModelAttributeValue
 } from '../model/model-domain'
 import type { QueryModel } from '../model/query-model'
 import type {
@@ -20,15 +20,15 @@ import type { SubQueryInput } from './query-builder-where'
 
 // ─── Capability Blocks ────────────────────────────────────────────────
 
-export interface HasGetState<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface HasGetState<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   getState(): Readonly<QueryModel<M, Rel>>
 }
 
-export interface CanSelect<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanSelect<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   select(fields: SelectFields<M>): QueryBuilderAfterSelect<M, Rel>
 }
 
-export interface CanJoin<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanJoin<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   join<R extends ExtractRelationshipFields<M, Rel>>(relationship: R): QueryBuilderAfterJoin<M, Rel>
   join<R extends ExtractRelationshipFields<M, Rel>>(
     relationship: R,
@@ -56,7 +56,7 @@ export interface CanJoin<M extends object, Rel extends RelationshipDefinitions =
   ): QueryBuilderAfterJoin<M, Rel>
 }
 
-export interface CanWhereStart<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanWhereStart<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   where<Field extends ModelAttributeField<M>>(
     field: Field,
     operator: 'is_null' | 'is_not_null'
@@ -102,7 +102,7 @@ export interface CanWhereStart<M extends object, Rel extends RelationshipDefinit
   ): QueryBuilderAfterWhere<M, Rel>
 }
 
-export interface CanWhereContinue<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap>
+export interface CanWhereContinue<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap>
   extends CanWhereStart<M, Rel> {
   orWhere<Field extends ModelAttributeField<M>>(
     field: Field,
@@ -132,7 +132,7 @@ export interface CanWhereContinue<M extends object, Rel extends RelationshipDefi
   or(): QueryBuilderAfterWhereLogical<M, Rel>
 }
 
-export interface CanAggregate<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanAggregate<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   count(field?: AggregateField<M>, as?: string): QueryBuilderAfterAggregate<M, Rel>
   sum<Field extends ModelAttributeField<M>>(field: Field, as?: string): QueryBuilderAfterAggregate<M, Rel>
   avg<Field extends ModelAttributeField<M>>(field: Field, as?: string): QueryBuilderAfterAggregate<M, Rel>
@@ -141,15 +141,15 @@ export interface CanAggregate<M extends object, Rel extends RelationshipDefiniti
   aggregate(fn: AggregateFunction, field: AggregateField<M>, as?: string): QueryBuilderAfterAggregate<M, Rel>
 }
 
-export interface CanGroupBy<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanGroupBy<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   groupBy<Field extends ModelAttributeField<M>>(field: Field): QueryBuilderAfterGroupBy<M, Rel>
 }
 
-export interface CanSort<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanSort<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   orderBy<Field extends ModelAttributeField<M>>(field: Field, direction: SortDirection): QueryBuilderAfterSort<M, Rel>
 }
 
-export interface CanDistinct<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanDistinct<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   distinct(): QueryBuilderAfterDistinct<M, Rel>
 }
 
@@ -157,12 +157,12 @@ export interface CanParanoid {
   paranoid(paranoid: boolean): this
 }
 
-export interface CanLimit<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanLimit<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   limit(limit: number): QueryBuilderAfterLimit<M, Rel>
   offset(offset: number): QueryBuilderAfterLimit<M, Rel>
 }
 
-export interface CanLock<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface CanLock<M extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   lock(mode: import('../types').LockMode): QueryBuilderAfterWhere<M, Rel>
 }
 
@@ -173,7 +173,7 @@ export interface CanLock<M extends object, Rel extends RelationshipDefinitions =
  */
 export type QueryBuilderInitial<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> &
   CanSelect<M, Rel> &
   CanJoin<M, Rel> &
@@ -191,7 +191,7 @@ export type QueryBuilderInitial<
  */
 export type QueryBuilderAfterJoin<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryBuilderInitial<M, Rel>
 
 /**
@@ -199,7 +199,7 @@ export type QueryBuilderAfterJoin<
  */
 export type QueryBuilderAfterSelect<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> &
   CanJoin<M, Rel> &
   CanWhereStart<M, Rel> &
@@ -216,7 +216,7 @@ export type QueryBuilderAfterSelect<
  */
 export type QueryBuilderAfterWhere<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> &
   CanSelect<M, Rel> &
   CanJoin<M, Rel> &
@@ -234,7 +234,7 @@ export type QueryBuilderAfterWhere<
  */
 export type QueryBuilderAfterWhereLogical<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = CanWhereStart<M, Rel>
 
 /**
@@ -242,7 +242,7 @@ export type QueryBuilderAfterWhereLogical<
  */
 export type QueryBuilderAfterAggregate<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> &
   CanAggregate<M, Rel> &
   CanGroupBy<M, Rel> &
@@ -257,7 +257,7 @@ export type QueryBuilderAfterAggregate<
  */
 export type QueryBuilderAfterGroupBy<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> &
   CanAggregate<M, Rel> &
   CanGroupBy<M, Rel> &
@@ -272,7 +272,7 @@ export type QueryBuilderAfterGroupBy<
  */
 export type QueryBuilderAfterSort<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> & CanSort<M, Rel> & CanDistinct<M, Rel> & CanParanoid & CanLimit<M, Rel> & CanLock<M, Rel>
 
 /**
@@ -280,7 +280,7 @@ export type QueryBuilderAfterSort<
  */
 export type QueryBuilderAfterDistinct<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> & CanSort<M, Rel> & CanParanoid & CanLimit<M, Rel> & CanLock<M, Rel>
 
 /**
@@ -288,5 +288,5 @@ export type QueryBuilderAfterDistinct<
  */
 export type QueryBuilderAfterLimit<
   M extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = HasGetState<M, Rel> & CanParanoid & CanLimit<M, Rel> & CanLock<M, Rel>

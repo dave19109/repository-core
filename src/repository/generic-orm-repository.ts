@@ -1,9 +1,9 @@
 import type { GenericOrmClient } from '../generic-orm-client'
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ModelAttributeField,
-  ModelAttributeFieldNumber,
-  RelationshipDefinitions
+  ModelAttributeFieldNumber
 } from '../model/model-domain'
 import type { QueryModel } from '../model/query-model'
 import { QueryBuilder } from '../query-builder/query-builder'
@@ -16,7 +16,7 @@ export abstract class GenericOrmRepository<
   Model extends object,
   DomainRecord extends object,
   PersistenceModel extends object = Model,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap,
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap,
   PersistenceQuery extends object = QueryModel<Model, Rel>
 > extends Repository<Model, DomainRecord, PersistenceModel, Rel> {
   constructor(protected readonly client: GenericOrmClient<PersistenceModel, PersistenceQuery, Model>) {

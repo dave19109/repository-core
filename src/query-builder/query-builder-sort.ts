@@ -1,10 +1,10 @@
-import type { EmptyRelationshipMap, ModelAttributeField, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap, ModelAttributeField } from '../model/model-domain'
 import type { SortDirection } from '../types'
 import { BaseQueryBuilder } from './base-query-builder'
 
 export class QueryBuilderSort<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   private static readonly VALID_DIRECTIONS: SortDirection[] = ['asc', 'desc']
 

@@ -1,10 +1,10 @@
-import type { EmptyRelationshipMap, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap } from '../model/model-domain'
 import type { SelectFields } from '../types'
 import { BaseQueryBuilder } from './base-query-builder'
 
 export class QueryBuilderSelect<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   private static readonly DEFAULT_SELECT_FIELDS = ['*'] as const
 

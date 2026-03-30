@@ -1,5 +1,9 @@
 import { GenericOrmClient } from '../src/generic-orm-client'
-import type { ModelAttributeField, ModelAttributeFieldNumber } from '../src/model/model-domain'
+import type {
+  EmptyRelationshipMap,
+  ModelAttributeField,
+  ModelAttributeFieldNumber
+} from '../src/model/model-domain'
 import type { QueryModel } from '../src/model/query-model'
 import { GenericOrmRepository } from '../src/repository/generic-orm-repository'
 import { RepositoryMapper } from '../src/repository/repository-adapter'
@@ -129,7 +133,13 @@ class InMemoryProductClient extends GenericOrmClient<ProductRow, ProductOrmQuery
   }
 }
 
-class ProductRepository extends GenericOrmRepository<ProductAggregate, ProductReadModel, ProductRow, ProductOrmQuery> {
+class ProductRepository extends GenericOrmRepository<
+  ProductAggregate,
+  ProductReadModel,
+  ProductRow,
+  EmptyRelationshipMap,
+  ProductOrmQuery
+> {
   protected readonly mapper = new ProductMapper()
 
   async insert(_model: ProductAggregate[] | ProductAggregate): Promise<void> {

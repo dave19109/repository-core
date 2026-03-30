@@ -84,6 +84,7 @@
     "@cspell/dict-software-terms": "^5.2.2",
     "@cspell/dict-typescript": "^3.2.3",
     "@swc/core": "^1.15.21",
+    "@tackpay/ddd": "^0.0.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",

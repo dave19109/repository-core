@@ -1,10 +1,10 @@
-import type { EmptyRelationshipMap, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap } from '../model/model-domain'
 import { QueryModel } from '../model/query-model'
 import { BaseQueryBuilder } from './base-query-builder'
 
 export class QueryBuilderBase<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   constructor() {
     super(

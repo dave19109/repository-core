@@ -1,4 +1,4 @@
-import type { EmptyRelationshipMap, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap } from '../model/model-domain'
 import { QueryBuilderAggregate } from './query-builder-aggregate'
 import { QueryBuilderBase } from './query-builder-base'
 import { QueryBuilderDistinct } from './query-builder-distinct'
@@ -43,12 +43,12 @@ applyMixins(QueryBuilderBase, [
 
 type QueryBuilderConstructor = new <
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 >() => QueryBuilderInitial<Model, Rel>
 
 export type QueryBuilder<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryBuilderInitial<Model, Rel>
 
 export const QueryBuilder = QueryBuilderBase as unknown as QueryBuilderConstructor

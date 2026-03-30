@@ -1,10 +1,10 @@
-import type { EmptyRelationshipMap, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap } from '../model/model-domain'
 import type { LockMode } from '../types'
 import { BaseQueryBuilder } from './base-query-builder'
 
 export class QueryBuilderLock<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends BaseQueryBuilder<Model, Rel> {
   /**
    * Sets a pessimistic lock mode for the query.

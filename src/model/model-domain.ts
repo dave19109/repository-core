@@ -26,6 +26,15 @@ export interface RelationshipModel<Source extends object, Target extends object,
 export type RelationshipDefinition = RelationshipModel<any, any, any>
 export type RelationshipDefinitions = Record<string, RelationshipDefinition>
 
+/**
+ * Structural constraint for relationship maps: each key must map to `RelationshipDefinition`.
+ * Prefer this over `extends RelationshipDefinitions` (`Record<string, ...>`) in generics so
+ * object types with explicit keys (better editor suggestions) stay assignable without a string index signature.
+ */
+export type AsRelationshipDefinitions<Rel extends object> = {
+  [K in keyof Rel]: RelationshipDefinition
+}
+
 type ResolveRelationshipValue<T extends RelationshipDefinition> =
   T extends RelationshipModel<any, infer Target, infer Kind>
     ? Kind extends 'oneToOne' | 'manyToOne'
@@ -37,7 +46,7 @@ type ResolveRelationshipValue<T extends RelationshipDefinition> =
 
 type ExtractAttributes<T extends object> = NonFunctionProperties<T>
 
-type ResolvedRelationships<T extends RelationshipDefinitions> = {
+type ResolvedRelationships<T extends AsRelationshipDefinitions<T>> = {
   [K in keyof T]: ResolveRelationshipValue<T[K]>
 }
 
@@ -62,27 +71,27 @@ export type ModelAttributeFieldValues<T extends object> = {
  */
 export type ModelRelationshipField<
   _Model extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = keyof Rel & string
 
 export type ExtractRelationshipFields<
   _Model extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = keyof Rel & string
 
 export type ExtractRelationshipTargetModel<
   T extends object,
   K extends keyof Rel & string,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = Rel[K] extends RelationshipModel<T, infer Target, any> ? Target : never
 
 export type ModelRelationshipValue<
   _Model extends object,
   K extends keyof Rel & string,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = Rel[K] extends RelationshipDefinition ? ResolveRelationshipValue<Rel[K]> : never
 
 export type ResolvedModelRelationships<
   _Model extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = ResolvedRelationships<Rel>

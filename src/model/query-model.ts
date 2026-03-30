@@ -1,7 +1,7 @@
 import type { Aggregation, Join, LockMode, SelectFields, SortField, WhereClause } from '../types'
-import type { EmptyRelationshipMap, ModelAttributeField, RelationshipDefinitions } from './model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap, ModelAttributeField } from './model-domain'
 
-interface QueryModelOptions<M extends object = object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+interface QueryModelOptions<M extends object = object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   select: SelectFields<M>
   joins: Join<M, Rel>[]
   aggregations: Aggregation<M>[]
@@ -35,7 +35,7 @@ interface QueryModelOptions<M extends object = object, Rel extends RelationshipD
  * })
  * console.log(query) // QueryModel<User>
  */
-export class QueryModel<M extends object = object, Rel extends RelationshipDefinitions = EmptyRelationshipMap>
+export class QueryModel<M extends object = object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap>
   implements QueryModelOptions<M, Rel>
 {
   /**

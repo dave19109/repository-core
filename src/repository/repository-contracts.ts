@@ -1,8 +1,8 @@
 import type {
+  AsRelationshipDefinitions,
   EmptyRelationshipMap,
   ModelAttributeField,
-  ModelAttributeFieldNumber,
-  RelationshipDefinitions
+  ModelAttributeFieldNumber
 } from '../model/model-domain'
 import type { PaginationResult } from '../types'
 import type {
@@ -18,27 +18,27 @@ export type QueryScopeCallback<TQuery> = (query: TQuery) => TQuery
 
 export type FindAllQueryCallback<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryScopeCallback<FindAllQuery<Model, Rel>>
 export type FindOneQueryCallback<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryScopeCallback<FindOneQuery<Model, Rel>>
 export type PaginateQueryCallback<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryScopeCallback<PaginateQuery<Model, Rel>>
 export type CountQueryCallback<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryScopeCallback<CountQuery<Model, Rel>>
 export type AggregateQueryCallback<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryScopeCallback<AggregateQuery<Model, Rel>>
 export type MutationQueryCallback<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > = QueryScopeCallback<MutationQuery<Model, Rel>>
 
 /**
@@ -47,7 +47,7 @@ export type MutationQueryCallback<
 export interface RepositoryReader<
   Model extends object,
   DomainRecord extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > {
   findAll(builder?: FindAllQueryCallback<Model, Rel>): Promise<DomainRecord[]>
   findOne(builder?: FindOneQueryCallback<Model, Rel>): Promise<DomainRecord | null>
@@ -76,7 +76,7 @@ export interface RepositoryReader<
 /**
  * Write-only repository contract for an aggregate root.
  */
-export interface RepositoryWriter<Model extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+export interface RepositoryWriter<Model extends object, Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap> {
   insert(model: Model[] | Model, query?: MutationQueryCallback<Model, Rel>): Promise<void>
   update(model: Partial<Model>, query?: MutationQueryCallback<Model, Rel>): Promise<void>
   upsert(model: Model, query?: MutationQueryCallback<Model, Rel>): Promise<void>
@@ -96,7 +96,7 @@ export interface RepositoryWriter<Model extends object, Rel extends Relationship
 export interface RepositoryPort<
   Model extends object,
   DomainRecord extends object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > extends RepositoryReader<Model, DomainRecord, Rel>,
     RepositoryWriter<Model, Rel> {}
 

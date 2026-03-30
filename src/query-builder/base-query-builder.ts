@@ -1,10 +1,10 @@
-import type { EmptyRelationshipMap, RelationshipDefinitions } from '../model/model-domain'
+import type { AsRelationshipDefinitions, EmptyRelationshipMap } from '../model/model-domain'
 import { QueryModel } from '../model/query-model'
 import type { LogicalOperator, WhereClause } from '../types'
 
 export class BaseQueryBuilder<
   Model extends object = object,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends AsRelationshipDefinitions<Rel> = EmptyRelationshipMap
 > {
   protected nextLogicalOperator: LogicalOperator = 'and'
   constructor(protected state: QueryModel<Model, Rel>) {}
@@ -33,7 +33,7 @@ export class BaseQueryBuilder<
     return cloned
   }
 
-  protected static cloneQueryModel<M extends object, R extends RelationshipDefinitions = EmptyRelationshipMap>(
+  protected static cloneQueryModel<M extends object, R extends AsRelationshipDefinitions<R> = EmptyRelationshipMap>(
     state: Readonly<QueryModel<M, R>>
   ): QueryModel<M, R> {
     return new QueryModel({
