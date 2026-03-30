@@ -49,7 +49,8 @@ export class BaseQueryBuilder<
       distinct: state.distinct,
       paranoid: state.paranoid,
       limit: state.limit,
-      offset: state.offset
+      offset: state.offset,
+      lock: state.lock
     })
   }
 

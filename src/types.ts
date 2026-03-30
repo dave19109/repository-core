@@ -105,6 +105,8 @@ export type SelectFields<M extends object> = ModelAttributeField<M>[] | ['*']
 
 export type SortDirection = 'asc' | 'desc'
 
+export type LockMode = 'for update' | 'for share'
+
 export interface SortField<M extends object> {
   field: ModelAttributeField<M>
   direction: SortDirection

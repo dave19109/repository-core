@@ -759,7 +759,8 @@ function cloneQueryModel<M extends object>(state: Readonly<QueryModel<M, any>>):
     distinct: state.distinct,
     paranoid: state.paranoid,
     limit: state.limit,
-    offset: state.offset
+    offset: state.offset,
+    lock: state.lock
   })
 }
 

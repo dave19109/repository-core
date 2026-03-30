@@ -1,4 +1,4 @@
-import type { Aggregation, Join, SelectFields, SortField, WhereClause } from '../types'
+import type { Aggregation, Join, LockMode, SelectFields, SortField, WhereClause } from '../types'
 import type { EmptyRelationshipMap, ModelAttributeField, RelationshipDefinitions } from './model-domain'
 
 interface QueryModelOptions<M extends object = object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
@@ -12,6 +12,7 @@ interface QueryModelOptions<M extends object = object, Rel extends RelationshipD
   limit?: number | undefined
   offset?: number | undefined
   paranoid?: boolean | undefined
+  lock?: LockMode | undefined
 }
 
 /**
@@ -90,6 +91,10 @@ export class QueryModel<M extends object = object, Rel extends RelationshipDefin
    * The paranoid value.
    */
   paranoid: boolean | undefined = undefined
+  /**
+   * The lock mode.
+   */
+  lock: LockMode | undefined = undefined
 
   constructor(props: Partial<QueryModelOptions<M, Rel>>) {
     this.select = props.select ?? (QueryModel.DEFAULT_SELECT_FIELDS as SelectFields<M>)
@@ -102,5 +107,6 @@ export class QueryModel<M extends object = object, Rel extends RelationshipDefin
     this.limit = props.limit
     this.offset = props.offset
     this.paranoid = props.paranoid ?? QueryModel.DEFAULT_PARANOID
+    this.lock = props.lock
   }
 }
