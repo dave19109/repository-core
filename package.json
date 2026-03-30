@@ -1,6 +1,6 @@
 {
   "name": "query-builder-model",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Typescript Query Builder Model",
   "files": [
     "dist",

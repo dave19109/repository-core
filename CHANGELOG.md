@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+### [0.0.3](https://github.com/dave19109/repository-core/compare/v0.0.2...v0.0.3) (2026-03-30)
+
 ### 0.0.2 (2026-03-30)
 
 ### Features
