@@ -4,6 +4,7 @@ import { QueryBuilderBase } from './query-builder-base'
 import { QueryBuilderDistinct } from './query-builder-distinct'
 import { QueryBuilderGroup } from './query-builder-group'
 import { QueryBuilderJoin } from './query-builder-join'
+import { QueryBuilderLock } from './query-builder-lock'
 import { QueryBuilderPagination } from './query-builder-pagination'
 import { QueryBuilderParanoid } from './query-builder-paranoid'
 import type { QueryBuilderInitial } from './query-builder-phases'
@@ -36,7 +37,8 @@ applyMixins(QueryBuilderBase, [
   QueryBuilderGroup,
   QueryBuilderDistinct,
   QueryBuilderParanoid,
-  QueryBuilderPagination
+  QueryBuilderPagination,
+  QueryBuilderLock
 ])
 
 type QueryBuilderConstructor = new <

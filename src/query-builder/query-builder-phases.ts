@@ -162,6 +162,10 @@ export interface CanLimit<M extends object, Rel extends RelationshipDefinitions 
   offset(offset: number): QueryBuilderAfterLimit<M, Rel>
 }
 
+export interface CanLock<M extends object, Rel extends RelationshipDefinitions = EmptyRelationshipMap> {
+  lock(mode: import('../types').LockMode): QueryBuilderAfterWhere<M, Rel>
+}
+
 // ─── Phase Compositions ───────────────────────────────────────────────
 
 /**
@@ -179,7 +183,8 @@ export type QueryBuilderInitial<
   CanSort<M, Rel> &
   CanDistinct<M, Rel> &
   CanParanoid &
-  CanLimit<M, Rel>
+  CanLimit<M, Rel> &
+  CanLock<M, Rel>
 
 /**
  * After JOIN: same as initial (joins are early in SQL pipeline).
@@ -203,7 +208,8 @@ export type QueryBuilderAfterSelect<
   CanSort<M, Rel> &
   CanDistinct<M, Rel> &
   CanParanoid &
-  CanLimit<M, Rel>
+  CanLimit<M, Rel> &
+  CanLock<M, Rel>
 
 /**
  * After WHERE: everything + orWhere/and/or for continued filtering.
@@ -220,7 +226,8 @@ export type QueryBuilderAfterWhere<
   CanSort<M, Rel> &
   CanDistinct<M, Rel> &
   CanParanoid &
-  CanLimit<M, Rel>
+  CanLimit<M, Rel> &
+  CanLock<M, Rel>
 
 /**
  * After and()/or(): only where operations allowed (must follow with a where clause).
@@ -242,7 +249,8 @@ export type QueryBuilderAfterAggregate<
   CanSort<M, Rel> &
   CanDistinct<M, Rel> &
   CanParanoid &
-  CanLimit<M, Rel>
+  CanLimit<M, Rel> &
+  CanLock<M, Rel>
 
 /**
  * After GROUP BY: no more where/select/join — only groupBy, aggregate, sort, distinct, limit.
@@ -256,7 +264,8 @@ export type QueryBuilderAfterGroupBy<
   CanSort<M, Rel> &
   CanDistinct<M, Rel> &
   CanParanoid &
-  CanLimit<M, Rel>
+  CanLimit<M, Rel> &
+  CanLock<M, Rel>
 
 /**
  * After ORDER BY: only more ordering, distinct, limit, or done.
@@ -264,7 +273,7 @@ export type QueryBuilderAfterGroupBy<
 export type QueryBuilderAfterSort<
   M extends object,
   Rel extends RelationshipDefinitions = EmptyRelationshipMap
-> = HasGetState<M, Rel> & CanSort<M, Rel> & CanDistinct<M, Rel> & CanParanoid & CanLimit<M, Rel>
+> = HasGetState<M, Rel> & CanSort<M, Rel> & CanDistinct<M, Rel> & CanParanoid & CanLimit<M, Rel> & CanLock<M, Rel>
 
 /**
  * After DISTINCT: only ordering, limit, or done.
@@ -272,7 +281,7 @@ export type QueryBuilderAfterSort<
 export type QueryBuilderAfterDistinct<
   M extends object,
   Rel extends RelationshipDefinitions = EmptyRelationshipMap
-> = HasGetState<M, Rel> & CanSort<M, Rel> & CanParanoid & CanLimit<M, Rel>
+> = HasGetState<M, Rel> & CanSort<M, Rel> & CanParanoid & CanLimit<M, Rel> & CanLock<M, Rel>
 
 /**
  * After LIMIT/OFFSET: only more limit/offset or done (terminal phase).
@@ -280,4 +289,4 @@ export type QueryBuilderAfterDistinct<
 export type QueryBuilderAfterLimit<
   M extends object,
   Rel extends RelationshipDefinitions = EmptyRelationshipMap
-> = HasGetState<M, Rel> & CanParanoid & CanLimit<M, Rel>
+> = HasGetState<M, Rel> & CanParanoid & CanLimit<M, Rel> & CanLock<M, Rel>
