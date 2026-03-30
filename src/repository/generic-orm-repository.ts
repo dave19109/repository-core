@@ -9,6 +9,7 @@ import type { QueryModel } from '../model/query-model'
 import { QueryBuilder } from '../query-builder/query-builder'
 import type { PaginationResult } from '../types'
 import { type FindOneQueryCallback, type MutationQueryCallback, Repository } from './repository'
+import { RepositoryExecutionError, RepositoryMappingError, RepositoryQueryBuildError } from './repository-errors'
 import type { FindOneQuery, MutationQuery } from './repository-query-scopes'
 
 export abstract class GenericOrmRepository<
@@ -22,6 +23,10 @@ export abstract class GenericOrmRepository<
     super()
   }
 
+  private mutationErrorContext(operation: string) {
+    return { operation, model: this.constructor.name }
+  }
+
   /**
    * Inserts a model into the repository.
    * @param {Model | Model[]} model - The model to insert.
@@ -29,7 +34,26 @@ export abstract class GenericOrmRepository<
    * @returns {Promise<void>} - A promise that resolves when the model is inserted.
    */
   async insert(model: Model | Model[], query?: MutationQueryCallback<Model, Rel>): Promise<void> {
-    return this.client.insert(this.toPersistenceModels(model), this.toPersistenceMutationQuery(query))
+    const persistenceModels = this.toPersistenceModels(model)
+
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceMutationQuery(query)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository insert query build failed', {
+        cause,
+        context: this.mutationErrorContext('insert')
+      })
+    }
+
+    try {
+      await this.client.insert(persistenceModels, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository insert execution failed', {
+        cause,
+        context: this.mutationErrorContext('insert')
+      })
+    }
   }
 
   /**
@@ -39,7 +63,26 @@ export abstract class GenericOrmRepository<
    * @returns {Promise<void>} - A promise that resolves when the model is updated.
    */
   async update(model: Partial<Model>, query?: MutationQueryCallback<Model, Rel>): Promise<void> {
-    return this.client.update(this.toPersistencePartialModel(model), this.toPersistenceMutationQuery(query))
+    const persistenceModel = this.toPersistencePartialModel(model)
+
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceMutationQuery(query)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository update query build failed', {
+        cause,
+        context: this.mutationErrorContext('update')
+      })
+    }
+
+    try {
+      await this.client.update(persistenceModel, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository update execution failed', {
+        cause,
+        context: this.mutationErrorContext('update')
+      })
+    }
   }
 
   /**
@@ -49,7 +92,26 @@ export abstract class GenericOrmRepository<
    * @returns {Promise<void>} - A promise that resolves when the model is upserted.
    */
   async upsert(model: Model, query?: MutationQueryCallback<Model, Rel>): Promise<void> {
-    return this.client.upsert(this.toPersistenceModel(model), this.toPersistenceMutationQuery(query))
+    const persistenceModel = this.toPersistenceModel(model)
+
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceMutationQuery(query)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository upsert query build failed', {
+        cause,
+        context: this.mutationErrorContext('upsert')
+      })
+    }
+
+    try {
+      await this.client.upsert(persistenceModel, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository upsert execution failed', {
+        cause,
+        context: this.mutationErrorContext('upsert')
+      })
+    }
   }
 
   /**
@@ -59,7 +121,26 @@ export abstract class GenericOrmRepository<
    * @returns {Promise<void>} - A promise that resolves when the model is deleted.
    */
   async destroy(model: Model | Model[], query?: MutationQueryCallback<Model, Rel>): Promise<void> {
-    return this.client.destroy(this.toPersistenceModels(model), this.toPersistenceMutationQuery(query))
+    const persistenceModels = this.toPersistenceModels(model)
+
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceMutationQuery(query)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository destroy query build failed', {
+        cause,
+        context: this.mutationErrorContext('destroy')
+      })
+    }
+
+    try {
+      await this.client.destroy(persistenceModels, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository destroy execution failed', {
+        cause,
+        context: this.mutationErrorContext('destroy')
+      })
+    }
   }
 
   /**
@@ -74,7 +155,26 @@ export abstract class GenericOrmRepository<
     value: number,
     query?: MutationQueryCallback<Model, Rel>
   ): Promise<void> {
-    return this.client.increment(this.toPersistenceField(field), value, this.toPersistenceMutationQuery(query))
+    const persistenceField = this.toPersistenceField(field)
+
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceMutationQuery(query)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository increment query build failed', {
+        cause,
+        context: this.mutationErrorContext('increment')
+      })
+    }
+
+    try {
+      await this.client.increment(persistenceField, value, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository increment execution failed', {
+        cause,
+        context: this.mutationErrorContext('increment')
+      })
+    }
   }
 
   /**
@@ -89,7 +189,26 @@ export abstract class GenericOrmRepository<
     value: number,
     query?: MutationQueryCallback<Model, Rel>
   ): Promise<void> {
-    return this.client.decrement(this.toPersistenceField(field), value, this.toPersistenceMutationQuery(query))
+    const persistenceField = this.toPersistenceField(field)
+
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceMutationQuery(query)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository decrement query build failed', {
+        cause,
+        context: this.mutationErrorContext('decrement')
+      })
+    }
+
+    try {
+      await this.client.decrement(persistenceField, value, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository decrement execution failed', {
+        cause,
+        context: this.mutationErrorContext('decrement')
+      })
+    }
   }
   /**
    * Finds a model by its ID.
@@ -98,11 +217,38 @@ export abstract class GenericOrmRepository<
    * @returns {Promise<DomainRecord | null>} - A promise that resolves with the model or null if not found.
    */
   async findById(id: string | number, builder?: FindOneQueryCallback<Model, Rel>): Promise<DomainRecord | null> {
-    const result = await this.client.findById(id, this.toPersistenceFindOneQuery(builder))
+    let persistenceQuery: PersistenceQuery | undefined
+    try {
+      persistenceQuery = this.toPersistenceFindOneQuery(builder)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError('Repository findById query build failed', {
+        cause,
+        context: this.mutationErrorContext('findById')
+      })
+    }
+
+    let result: PersistenceModel | null
+    try {
+      result = await this.client.findById(id, persistenceQuery)
+    } catch (cause) {
+      throw new RepositoryExecutionError('Repository findById execution failed', {
+        cause,
+        context: this.mutationErrorContext('findById')
+      })
+    }
+
     if (!result) {
       return null
     }
-    return this.mapper.toDomain(result)
+
+    try {
+      return this.mapper.toDomain(result)
+    } catch (cause) {
+      throw new RepositoryMappingError('Repository findById mapping failed', {
+        cause,
+        context: this.mutationErrorContext('findById')
+      })
+    }
   }
 
   /**

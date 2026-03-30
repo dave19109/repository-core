@@ -1,35 +1,27 @@
 name: setup-environment
-description: Composite action to setup environment and install dependencies
+description: Composite action to setup Node.js, pnpm, and install dependencies
+
+inputs:
+  registry-url:
+    description: npm registry URL (required for publishing)
+    required: false
+    default: ''
 
 runs:
   using: composite
   steps:
-    - name: 🤹‍♂️ Install asdf
-      uses: asdf-vm/actions/setup@v3
-
-    - name: 🗂️ Cache asdf
-      id: cache-asdf
-      uses: actions/cache@v4
-      env:
-        cache-name: cache-asdf
-        cache-path: ~/.asdf
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        path: ${{ env.cache-path }}
-        key: ${{ runner.os }}-se-${{ env.cache-name }}-${{ hashFiles('**/.tool-versions') }}
-        restore-keys: |
-          ${{ runner.os }}-se-${{ env.cache-name }}-
+        node-version-file: '.tool-verisions'
+        registry-url: ${{ inputs.registry-url }}
 
-    - name: 🛠️ Install tools from .tool-versions
-      if: ${{ steps.cache-asdf.outputs.cache-hit != 'true' }}
-      continue-on-error: true
-      uses: asdf-vm/actions/install@v3
-
-    - name: 📦 Setup pnpm
-      uses: pnpm/action-setup@v2
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
       with:
-        version: 10 # or the version you use
+        version: 10
 
-    - name: 🗂️ Cache pnpm store
+    - name: Cache pnpm store
       id: cache-pnpm
       uses: actions/cache@v4
       with:
@@ -38,10 +30,6 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
-    - name: 📥 Install dependencies with pnpm
+    - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
-
-    # - name: 💎 Generate Prisma models
-    #   shell: bash
-    #   run: pnpm run prisma:generate

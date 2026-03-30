@@ -16,6 +16,7 @@ import type {
   PaginateQueryCallback,
   RepositoryPort
 } from './repository-contracts'
+import { RepositoryExecutionError, RepositoryMappingError, RepositoryQueryBuildError } from './repository-errors'
 import type { AggregateQuery, CountQuery, FindAllQuery, FindOneQuery, PaginateQuery } from './repository-query-scopes'
 
 export type {
@@ -36,15 +37,37 @@ export abstract class Repository<
 {
   protected abstract readonly mapper: RepositoryMapper<PersistenceModel, DomainRecord>
 
+  private errorContext(operation: string) {
+    return { operation, model: this.constructor.name }
+  }
+
   /**
    * Executes a find all query.
    * @param {FindAllQueryCallback<Model>} builder - The query builder to use for the find all.
    * @returns {Promise<DomainRecord[]>} - A promise that resolves with the models.
    */
   async findAll(builder?: FindAllQueryCallback<Model, Rel>): Promise<DomainRecord[]> {
-    const query = this.makeScopedQueryBuilder<FindAllQuery<Model, Rel>>(builder)
-    const result = await this.executeFindAll(query as unknown as QueryBuilder<Model, Rel>)
-    return result.map((item) => this.mapper.toDomain(item))
+    const operation = 'findAll'
+    const query = this.makeScopedQueryBuilder<FindAllQuery<Model, Rel>>(builder, operation)
+
+    let result: PersistenceModel[]
+    try {
+      result = await this.executeFindAll(query as unknown as QueryBuilder<Model, Rel>)
+    } catch (cause) {
+      throw new RepositoryExecutionError(`Repository ${operation} execution failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
+
+    try {
+      return result.map((item) => this.mapper.toDomain(item))
+    } catch (cause) {
+      throw new RepositoryMappingError(`Repository ${operation} mapping failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
   }
 
   /**
@@ -53,14 +76,31 @@ export abstract class Repository<
    * @returns {Promise<DomainRecord | null>} - A promise that resolves with the model or null if not found.
    */
   async findOne(builder?: FindOneQueryCallback<Model, Rel>): Promise<DomainRecord | null> {
-    const query = this.makeScopedQueryBuilder<FindOneQuery<Model, Rel>>(builder)
+    const operation = 'findOne'
+    const query = this.makeScopedQueryBuilder<FindOneQuery<Model, Rel>>(builder, operation)
     const scopedQuery = query.getState().limit === 1 ? query : query.limit(1)
 
-    const result = await this.executeFindOne(scopedQuery as unknown as QueryBuilder<Model, Rel>)
+    let result: PersistenceModel | null
+    try {
+      result = await this.executeFindOne(scopedQuery as unknown as QueryBuilder<Model, Rel>)
+    } catch (cause) {
+      throw new RepositoryExecutionError(`Repository ${operation} execution failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
     if (!result) {
       return null
     }
-    return this.mapper.toDomain(result)
+
+    try {
+      return this.mapper.toDomain(result)
+    } catch (cause) {
+      throw new RepositoryMappingError(`Repository ${operation} mapping failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
   }
 
   /**
@@ -79,15 +119,31 @@ export abstract class Repository<
    * @returns {Promise<PaginationResult<DomainRecord>>} - A promise that resolves with the pagination result.
    */
   async paginate(builder?: PaginateQueryCallback<Model, Rel>): Promise<PaginationResult<DomainRecord>> {
-    const query = this.makeScopedQueryBuilder<PaginateQuery<Model, Rel>>(builder)
+    const operation = 'paginate'
+    const query = this.makeScopedQueryBuilder<PaginateQuery<Model, Rel>>(builder, operation)
     const withLimit = query.getState().limit === undefined ? query.limit(10) : query
     const scopedQuery = withLimit.getState().offset === undefined ? withLimit.offset(0) : withLimit
 
-    const result = await this.executePaginate(scopedQuery as unknown as QueryBuilder<Model, Rel>)
+    let result: PaginationResult<PersistenceModel>
+    try {
+      result = await this.executePaginate(scopedQuery as unknown as QueryBuilder<Model, Rel>)
+    } catch (cause) {
+      throw new RepositoryExecutionError(`Repository ${operation} execution failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
 
-    return {
-      ...result,
-      items: result.items.map((item) => this.mapper.toDomain(item))
+    try {
+      return {
+        ...result,
+        items: result.items.map((item) => this.mapper.toDomain(item))
+      }
+    } catch (cause) {
+      throw new RepositoryMappingError(`Repository ${operation} mapping failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
     }
   }
 
@@ -97,8 +153,17 @@ export abstract class Repository<
    * @returns {Promise<number>} - A promise that resolves with the count result.
    */
   async count(builder?: CountQueryCallback<Model, Rel>): Promise<number> {
-    const query = this.makeScopedQueryBuilder<CountQuery<Model, Rel>>(builder)
-    return this.executeCount(query as unknown as QueryBuilder<Model, Rel>)
+    const operation = 'count'
+    const query = this.makeScopedQueryBuilder<CountQuery<Model, Rel>>(builder, operation)
+
+    try {
+      return await this.executeCount(query as unknown as QueryBuilder<Model, Rel>)
+    } catch (cause) {
+      throw new RepositoryExecutionError(`Repository ${operation} execution failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
   }
 
   /**
@@ -260,14 +325,33 @@ export abstract class Repository<
    * @param {AggregateQueryCallback<Model>} builder - The query builder to use for the aggregate.
    * @returns {Promise<number>} - A promise that resolves with the aggregate result.
    */
-  private executeAggregateQuery<Field extends ModelAttributeField<Model>>(
+  private async executeAggregateQuery<Field extends ModelAttributeField<Model>>(
     fn: AggregateFunction,
     field: Field,
     builder?: AggregateQueryCallback<Model, Rel>
   ): Promise<number> {
-    const base = this.makeScopedQueryBuilder<AggregateQuery<Model, Rel>>(builder)
-    const query = (base as unknown as QueryBuilder<Model, Rel>).aggregate(fn, field)
-    return this.executeAggregate(query as unknown as QueryBuilder<Model, Rel>)
+    const operation = `aggregate:${fn}`
+
+    const base = this.makeScopedQueryBuilder<AggregateQuery<Model, Rel>>(builder, operation)
+
+    let queryAfterAggregate: unknown
+    try {
+      queryAfterAggregate = (base as unknown as QueryBuilder<Model, Rel>).aggregate(fn, field)
+    } catch (cause) {
+      throw new RepositoryQueryBuildError(`Repository ${operation} query build failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
+
+    try {
+      return await this.executeAggregate(queryAfterAggregate as unknown as QueryBuilder<Model, Rel>)
+    } catch (cause) {
+      throw new RepositoryExecutionError(`Repository ${operation} execution failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
   }
 
   /**
@@ -275,8 +359,19 @@ export abstract class Repository<
    * @param {Q} builder - The query builder to use for the scoped query.
    * @returns {Q} - The scoped query builder.
    */
-  private makeScopedQueryBuilder<Q>(builder?: (query: Q) => Q): Q {
+  private makeScopedQueryBuilder<Q>(builder: ((query: Q) => Q) | undefined, operation: string): Q {
     const query = new QueryBuilder<Model, Rel>() as unknown as Q
-    return builder?.(query) ?? query
+    if (!builder) {
+      return query
+    }
+
+    try {
+      return builder(query) ?? query
+    } catch (cause) {
+      throw new RepositoryQueryBuildError(`Repository ${operation} query builder callback failed`, {
+        cause,
+        context: this.errorContext(operation)
+      })
+    }
   }
 }

@@ -42,6 +42,12 @@ export type {
   RepositoryReader,
   RepositoryWriter
 } from './repository/repository-contracts'
+export {
+  RepositoryError,
+  RepositoryExecutionError,
+  RepositoryMappingError,
+  RepositoryQueryBuildError
+} from './repository/repository-errors'
 export type { RepositoryQueryConverter } from './repository/repository-query-converter'
 export { IdentityRepositoryQueryConverter } from './repository/repository-query-converter'
 export type {
