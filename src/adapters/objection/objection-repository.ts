@@ -1,11 +1,12 @@
 import type { Knex } from 'knex'
 import type { Model, ModelClass, ModelObject } from 'objection'
+import type { RetryPolicy } from '../../concurrency/retry'
+import { withRetry } from '../../concurrency/retry'
+import { wrapIfSerializationError } from '../../concurrency/transaction'
 import type { EmptyRelationshipMap, RelationshipDefinitions } from '../../model/model-domain'
 import { GenericOrmRepository } from '../../repository/generic-orm-repository'
-import { withRetry } from '../../concurrency/retry'
-import type { RetryPolicy } from '../../concurrency/retry'
-import { ObjectionClient, type ObjectionQuery } from './object-client'
-import { wrapIfSerializationError } from '../../concurrency/transaction'
+import { ObjectionClient } from './object-client'
+import type { ObjectionQuery } from './types'
 
 /**
  * Query builder and filter APIs use {@link ModelObject}, Objection's row-shaped type: it omits
@@ -15,7 +16,7 @@ export abstract class ObjectionRepository<
   M extends Model,
   D extends object,
   Rel extends RelationshipDefinitions = EmptyRelationshipMap
-> extends GenericOrmRepository<ModelObject<M>, D, M, ObjectionQuery<M, ModelObject<M>>, Rel> {
+> extends GenericOrmRepository<ModelObject<M>, D, M, Rel, ObjectionQuery<M, ModelObject<M>>> {
   constructor(modelClass: ModelClass<M>) {
     super(
       new ObjectionClient<M, ModelObject<M>>(modelClass, {

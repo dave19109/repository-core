@@ -14,6 +14,9 @@ type NonFunctionProperties<T extends object> = {
       : K]: T[K]
 }
 
+/**
+ * Typing-only description of a relation (cardinality + target); ORMs wire storage with their own metadata.
+ */
 export interface RelationshipModel<Source extends object, Target extends object, Kind extends RelationshipKind> {
   kind: Kind
   source?: Source

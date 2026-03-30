@@ -1,3 +1,5 @@
+export type { RetryPolicy } from './concurrency'
+export { runInTransaction } from './concurrency'
 export { GenericOrmClient } from './generic-orm-client'
 export type {
   EmptyRelationshipMap,
@@ -6,25 +8,11 @@ export type {
   ModelAttributeFieldNumber,
   ModelAttributeValue,
   RelationshipDefinitions,
+  RelationshipKind,
   RelationshipModel
 } from './model/model-domain'
 export type { QueryModel } from './model/query-model'
 export { QueryBuilder } from './query-builder/query-builder'
-export type {
-  CanonicalRelationship,
-  ColumnRef,
-  JoinKey,
-  PrismaRelationFieldSpec,
-  PrismaRelationFragment,
-  RelationshipKind,
-  RelationshipModelFromCanonical,
-  RelationshipTranslator,
-  RelationshipTranslatorRegistry
-} from './relationships'
-export {
-  canonicalToPrismaRelationFragment,
-  prismaRelationFragmentToString
-} from './relationships'
 export { GenericOrmRepository } from './repository/generic-orm-repository'
 export type {
   AggregateQueryCallback,
@@ -62,6 +50,7 @@ export type {
   FilterGroup,
   Join,
   JoinType,
+  LockMode,
   LogicalOperator,
   Operator,
   PaginationResult,
@@ -72,6 +61,3 @@ export type {
   SubQueryOperator,
   WhereClause
 } from './types'
-export { runInTransaction } from './concurrency'
-export type { RetryPolicy } from './concurrency'
-export type { LockMode } from './types'

@@ -16,8 +16,8 @@ export abstract class GenericOrmRepository<
   Model extends object,
   DomainRecord extends object,
   PersistenceModel extends object = Model,
-  PersistenceQuery extends object = QueryModel<Model, any>,
-  Rel extends RelationshipDefinitions = EmptyRelationshipMap
+  Rel extends RelationshipDefinitions = EmptyRelationshipMap,
+  PersistenceQuery extends object = QueryModel<Model, Rel>
 > extends Repository<Model, DomainRecord, PersistenceModel, Rel> {
   constructor(protected readonly client: GenericOrmClient<PersistenceModel, PersistenceQuery, Model>) {
     super()
