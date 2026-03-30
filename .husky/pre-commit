@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# The reason we're exporting this variable is because of this issue:
+# https://github.com/typicode/husky/issues/968
+export FORCE_COLOR=1
+
+# This script is used to format and check staged files before committing.
+echo 'Formatting and checking staged files before committing!'
+
+# Run check and format with Biome and tsc
+pnpm lint-staged
+
+# Run tests
+pnpm test
+
+# check if the .env file exist
+if [ ! -f .env ]; then
+  exit 0
+fi
+
+# Sync .env file with .env.example
+npx sync-dotenv
+
+# Print success message
+echo 'Formatting and checking process has been successfully completed!'

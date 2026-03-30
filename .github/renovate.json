@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "timezone": "Europe/Rome",
+  "schedule": [
+    "on friday"
+  ],
+  "extends": [
+    "config:base"
+  ],
+  "prHeader": "Ts Clean Code Node",
+  "assignees": [
+    "dave19109"
+  ],
+  "labels": [
+    "chore:update",
+    "dependencies"
+  ],
+  "ignoreDeps": [
+    "read-pkg"
+  ]
+}

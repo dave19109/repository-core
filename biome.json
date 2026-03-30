@@ -1,0 +1,98 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "includes": [
+      "biome.json",
+      "src/**/*",
+      "packages/**/*",
+      "tsup.config.ts",
+      "test/**/*",
+      "!**/package.json",
+      "!**/.cursor",
+      "!**/.vs-code",
+      "!**/.github",
+      "!**/.husky"
+    ],
+    "ignoreUnknown": false
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "warn",
+        "useSimplifiedLogicExpression": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedPrivateClassMembers": "error",
+        "useHookAtTopLevel": "error",
+        "noInvalidBuiltinInstantiation": "error",
+        "noSwitchDeclarations": "error"
+      },
+      "style": {
+        "useBlockStatements": "error",
+        "useCollapsedElseIf": "error",
+        "useForOf": "error",
+        "useFragmentSyntax": "error",
+        "useShorthandAssign": "error",
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
+      },
+      "suspicious": {
+        "noApproximativeNumericConstant": "warn",
+        "noEmptyBlockStatements": "error",
+        "noExplicitAny": "off",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["assert", "error", "info", "warn", "debug"]
+          }
+        }
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "quoteStyle": "single",
+      "lineWidth": 120,
+      "indentStyle": "space",
+      "semicolons": "asNeeded",
+      "trailingCommas": "none",
+      "lineEnding": "lf"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}

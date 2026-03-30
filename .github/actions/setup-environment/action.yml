@@ -1,0 +1,35 @@
+name: setup-environment
+description: Composite action to setup Node.js, pnpm, and install dependencies
+
+inputs:
+  registry-url:
+    description: npm registry URL (required for publishing)
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.tool-verisions'
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+
+    - name: Cache pnpm store
+      id: cache-pnpm
+      uses: actions/cache@v4
+      with:
+        path: ~/.pnpm-store
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
