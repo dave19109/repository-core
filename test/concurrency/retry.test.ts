@@ -1,6 +1,5 @@
-import { OptimisticLockConflictError, TransactionError } from '../../src/repository/repository-errors'
 import { withRetry } from '../../src/concurrency/retry'
-import type { RetryPolicy } from '../../src/concurrency/retry'
+import { OptimisticLockConflictError, TransactionError } from '../../src/repository/repository-errors'
 
 describe('withRetry', () => {
   it('returns the result on first success', async () => {
@@ -13,7 +12,9 @@ describe('withRetry', () => {
     const result = await withRetry(
       () => {
         attempts++
-        if (attempts < 3) throw new OptimisticLockConflictError('conflict')
+        if (attempts < 3) {
+          throw new OptimisticLockConflictError('conflict')
+        }
         return Promise.resolve('ok')
       },
       { maxAttempts: 3, backoff: 'linear', baseDelayMs: 0 }
@@ -27,7 +28,9 @@ describe('withRetry', () => {
     const result = await withRetry(
       () => {
         attempts++
-        if (attempts < 2) throw new TransactionError('deadlock')
+        if (attempts < 2) {
+          throw new TransactionError('deadlock')
+        }
         return Promise.resolve('done')
       },
       { maxAttempts: 3, backoff: 'linear', baseDelayMs: 0 }
@@ -77,7 +80,9 @@ describe('withRetry', () => {
       await withRetry(
         () => {
           attempts++
-          if (attempts < 3) throw new OptimisticLockConflictError('c')
+          if (attempts < 3) {
+            throw new OptimisticLockConflictError('c')
+          }
           return Promise.resolve('x')
         },
         { maxAttempts: 3, backoff: 'exponential', baseDelayMs: 100 }

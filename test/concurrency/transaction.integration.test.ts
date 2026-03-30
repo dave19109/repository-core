@@ -66,13 +66,15 @@ interface OrderDomain {
 
 class UserRepository extends ObjectionRepository<UserModel, UserDomain> {
   protected readonly mapper: RepositoryMapper<UserModel, UserDomain> = {
-    toDomain: (m) => ({ id: m.id, name: m.name, version: m.version })
+    toDomain: (m) => ({ id: m.id, name: m.name, version: m.version }),
+    toPersistence: (d) => ({ id: d.id, name: d.name, version: d.version }) as UserModel
   }
 }
 
 class OrderRepository extends ObjectionRepository<OrderModel, OrderDomain> {
   protected readonly mapper: RepositoryMapper<OrderModel, OrderDomain> = {
-    toDomain: (m) => ({ id: m.id, label: m.label })
+    toDomain: (m) => ({ id: m.id, label: m.label }),
+    toPersistence: (d) => ({ id: d.id, label: d.label }) as OrderModel
   }
 }
 
