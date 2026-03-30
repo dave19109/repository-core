@@ -72,6 +72,8 @@ export class ObjectionQueryConverter<PersistenceModel extends Model, DomainQuery
       this.applyPagination(builder, state)
     }
 
+    this.applyLock(builder, state)
+
     return builder
   }
 
@@ -481,6 +483,17 @@ export class ObjectionQueryConverter<PersistenceModel extends Model, DomainQuery
 
     if (state.offset !== undefined) {
       builder.offset(state.offset)
+    }
+  }
+
+  private applyLock<QueryModelShape extends object>(
+    builder: AnyObjectionQueryBuilder,
+    state: Readonly<QueryModel<QueryModelShape>>
+  ): void {
+    if (state.lock === 'for update') {
+      builder.forUpdate()
+    } else if (state.lock === 'for share') {
+      builder.forShare()
     }
   }
 
