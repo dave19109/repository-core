@@ -72,3 +72,6 @@ export type {
   SubQueryOperator,
   WhereClause
 } from './types'
+export { runInTransaction } from './concurrency'
+export type { RetryPolicy } from './concurrency'
+export type { LockMode } from './types'
