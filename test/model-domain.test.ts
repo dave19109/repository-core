@@ -1,3 +1,5 @@
+import type { ModelObject } from 'objection'
+import type { CountryModel } from '../examples/countries/country.model'
 import type { ModelAttributeField, ModelAttributeFieldNumber, ModelAttributeValue } from '../src/model/model-domain'
 
 type User = {
@@ -6,6 +8,21 @@ type User = {
 }
 
 type OrmUser = { id: number; email: string; active: boolean }
+
+/** Compile-time: these keys must not appear in attribute field unions for Objection models. */
+type AssertNotInUnion<Key extends string, Union> = Key extends Union ? never : true
+type _ExcludesObjectionMetaKeys = AssertNotInUnion<
+  'QueryBuilderType',
+  ModelAttributeField<CountryModel> | ModelAttributeField<ModelObject<CountryModel>>
+>
+type _ExcludesModelClassKey = AssertNotInUnion<
+  '$modelClass',
+  ModelAttributeField<CountryModel> | ModelAttributeField<ModelObject<CountryModel>>
+>
+type _ExcludesRelationNav = AssertNotInUnion<
+  'languages',
+  ModelAttributeField<CountryModel> | ModelAttributeField<ModelObject<CountryModel>>
+>
 
 describe('Model typing', () => {
   it('should infer attribute fields from plain object types', () => {
@@ -30,5 +47,14 @@ describe('Model typing', () => {
 
     expect(userNumeric).toBe('age')
     expect(ormNumeric).toBe('id')
+  })
+
+  it('excludes Objection framework keys and relation navigations from attribute fields (types)', () => {
+    const checks: readonly [_ExcludesObjectionMetaKeys, _ExcludesModelClassKey, _ExcludesRelationNav] = [
+      true,
+      true,
+      true
+    ]
+    expect(checks.every(Boolean)).toBe(true)
   })
 })

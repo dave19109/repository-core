@@ -16,4 +16,3 @@ export class ObjectionCountryRepository
     super(CountryModel)
   }
 }
-

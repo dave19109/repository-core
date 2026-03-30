@@ -1,3 +1,5 @@
+import type { Model } from 'objection'
+
 export type RelationshipKind = 'oneToOne' | 'oneToMany' | 'manyToOne' | 'manyToMany'
 
 /** Default relationship map when a model has no joins (second generic on `QueryBuilder`). */
@@ -13,6 +15,45 @@ type NonFunctionProperties<T extends object> = {
       ? never
       : K]: T[K]
 }
+
+type Defined<T> = Exclude<T, undefined>
+
+/**
+ * Keys that exist on Objection {@link Model} but are not table columns (see objection `DataPropertyNames` / `ModelProps`).
+ */
+type ObjectionOrmMetaKeys = 'QueryBuilderType' | '$modelClass'
+
+/**
+ * True when the property holds another model instance or an array of models (relation navigation).
+ */
+type IsModelRelationProperty<V> = [Defined<NonNullable<V>>] extends [never]
+  ? false
+  : Defined<NonNullable<V>> extends Model
+    ? true
+    : Defined<NonNullable<V>> extends ReadonlyArray<infer I>
+      ? [I] extends [never]
+        ? false
+        : I extends Model
+          ? true
+          : false
+      : false
+
+/**
+ * Column / attribute keys only: no methods, no Objection internals, no related model navigations.
+ *
+ * Implemented as a key-wise filter (not `Exclude<keyof T, RelationKeys>`): if `RelationKeys` ever
+ * widens to `string` (e.g. index signatures on `T`), `Exclude<..., string>` would strip every
+ * string literal key and collapse `ModelAttributeField` to `never`.
+ */
+type ColumnKeys<T extends object> = {
+  [K in keyof NonFunctionProperties<T>]: K extends ObjectionOrmMetaKeys
+    ? never
+    : IsModelRelationProperty<NonFunctionProperties<T>[K]> extends true
+      ? never
+      : K
+}[keyof NonFunctionProperties<T>]
+
+type ExtractAttributes<T extends object> = Pick<NonFunctionProperties<T>, ColumnKeys<T>>
 
 /**
  * Typing-only description of a relation (cardinality + target); ORMs wire storage with their own metadata.
@@ -43,8 +84,6 @@ type ResolveRelationshipValue<T extends RelationshipDefinition> =
         ? Target[]
         : never
     : never
-
-type ExtractAttributes<T extends object> = NonFunctionProperties<T>
 
 type ResolvedRelationships<T extends AsRelationshipDefinitions<T>> = {
   [K in keyof T]: ResolveRelationshipValue<T[K]>
