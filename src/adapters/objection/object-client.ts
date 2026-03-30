@@ -1,4 +1,5 @@
 import type { Model, ModelClass, PartialModelObject, QueryBuilder } from 'objection'
+import type { Knex } from 'knex'
 import { GenericOrmClient } from '../../generic-orm-client'
 import type { ModelAttributeFieldNumber } from '../../model/model-domain'
 import { QueryModel } from '../../model/query-model'
@@ -36,7 +37,8 @@ export class ObjectionQueryConverter<PersistenceModel extends Model, DomainQuery
 {
   constructor(
     private readonly modelClass: ModelClass<PersistenceModel>,
-    private readonly options: ObjectionClientOptions<DomainQueryModel> = {}
+    private readonly options: ObjectionClientOptions<DomainQueryModel> = {},
+    private readonly trx?: Knex.Transaction
   ) {}
 
   toPersistenceQuery(
@@ -47,9 +49,12 @@ export class ObjectionQueryConverter<PersistenceModel extends Model, DomainQuery
     return {
       state,
       createBuilder: (options) =>
-        this.applyState(this.modelClass.query() as unknown as AnyObjectionQueryBuilder, state, this.modelClass, {
-          applyPagination: options?.applyPagination ?? true
-        }) as unknown as QueryBuilder<PersistenceModel, PersistenceModel[]>
+        this.applyState(
+          this.modelClass.query(this.trx) as unknown as AnyObjectionQueryBuilder,
+          state,
+          this.modelClass,
+          { applyPagination: options?.applyPagination ?? true }
+        ) as unknown as QueryBuilder<PersistenceModel, PersistenceModel[]>
     }
   }
 
@@ -571,10 +576,19 @@ export class ObjectionClient<
 
   constructor(
     private readonly modelClass: ModelClass<PersistenceModel>,
-    options: ObjectionClientOptions<DomainQueryModel> = {}
+    private readonly options: ObjectionClientOptions<DomainQueryModel> = {},
+    private readonly trx?: Knex.Transaction
   ) {
     super()
-    this.queryConverter = new ObjectionQueryConverter(modelClass, options)
+    this.queryConverter = new ObjectionQueryConverter(modelClass, options, trx)
+  }
+
+  withTrx(trx: Knex.Transaction): this {
+    return new ObjectionClient(this.modelClass, this.options, trx) as this
+  }
+
+  getKnex(): Knex {
+    return this.modelClass.knex()
   }
 
   async findAll(query: ObjectionQuery<PersistenceModel, DomainQueryModel>): Promise<PersistenceModel[]> {
@@ -589,7 +603,7 @@ export class ObjectionClient<
     id: string | number,
     query?: ObjectionQuery<PersistenceModel, DomainQueryModel>
   ): Promise<PersistenceModel | null> {
-    const builder = query?.createBuilder() ?? this.modelClass.query()
+    const builder = query?.createBuilder() ?? this.modelClass.query(this.trx)
     return (await (builder as QueryBuilder<PersistenceModel, PersistenceModel[]>).findById(id)) ?? null
   }
 
@@ -636,7 +650,7 @@ export class ObjectionClient<
     model: PersistenceModel[] | PersistenceModel,
     query?: ObjectionQuery<PersistenceModel, DomainQueryModel>
   ): Promise<void> {
-    await (query?.createBuilder() ?? this.modelClass.query()).insert(model as PartialModelObject<PersistenceModel>)
+    await (query?.createBuilder() ?? this.modelClass.query(this.trx)).insert(model as PartialModelObject<PersistenceModel>)
   }
 
   async update(
@@ -651,14 +665,14 @@ export class ObjectionClient<
     }
 
     const id = this.extractIdentifier(model)
-    await this.modelClass.query().patchAndFetchById(id, patch)
+    await this.modelClass.query(this.trx).patchAndFetchById(id, patch)
   }
 
   async upsert(model: PersistenceModel, query?: ObjectionQuery<PersistenceModel, DomainQueryModel>): Promise<void> {
     const idColumns = this.getIdColumns()
     const conflictTarget = idColumns.length === 1 ? idColumns[0] : idColumns
 
-    await (query?.createBuilder() ?? this.modelClass.query())
+    await (query?.createBuilder() ?? this.modelClass.query(this.trx))
       .insert(model as PartialModelObject<PersistenceModel>)
       .onConflict(conflictTarget)
       .merge()
@@ -672,11 +686,11 @@ export class ObjectionClient<
     const ids = models.map((item) => this.extractIdentifier(item))
 
     if (ids.length === 1) {
-      await (query?.createBuilder() ?? this.modelClass.query()).deleteById(ids[0])
+      await (query?.createBuilder() ?? this.modelClass.query(this.trx)).deleteById(ids[0])
       return
     }
 
-    await (query?.createBuilder() ?? this.modelClass.query()).findByIds(ids).delete()
+    await (query?.createBuilder() ?? this.modelClass.query(this.trx)).findByIds(ids).delete()
   }
 
   async increment(
@@ -684,7 +698,7 @@ export class ObjectionClient<
     value: number,
     query?: ObjectionQuery<PersistenceModel, DomainQueryModel>
   ): Promise<void> {
-    await (query?.createBuilder() ?? this.modelClass.query()).increment(String(field), value)
+    await (query?.createBuilder() ?? this.modelClass.query(this.trx)).increment(String(field), value)
   }
 
   async decrement(
@@ -692,7 +706,7 @@ export class ObjectionClient<
     value: number,
     query?: ObjectionQuery<PersistenceModel, DomainQueryModel>
   ): Promise<void> {
-    await (query?.createBuilder() ?? this.modelClass.query()).decrement(String(field), value)
+    await (query?.createBuilder() ?? this.modelClass.query(this.trx)).decrement(String(field), value)
   }
 
   private getIdColumns(): string[] {
