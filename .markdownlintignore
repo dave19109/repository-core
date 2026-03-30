@@ -1,0 +1,9 @@
+.github/
+CHANGELOG.md
+PULL_REQUEST_TEMPLATE.md
+lib/
+node_modules/
+gen/
+note.md
+.cursor/
+.vs-code/

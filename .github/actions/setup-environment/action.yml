@@ -1,0 +1,47 @@
+name: setup-environment
+description: Composite action to setup environment and install dependencies
+
+runs:
+  using: composite
+  steps:
+    - name: 🤹‍♂️ Install asdf
+      uses: asdf-vm/actions/setup@v3
+
+    - name: 🗂️ Cache asdf
+      id: cache-asdf
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-asdf
+        cache-path: ~/.asdf
+      with:
+        path: ${{ env.cache-path }}
+        key: ${{ runner.os }}-se-${{ env.cache-name }}-${{ hashFiles('**/.tool-versions') }}
+        restore-keys: |
+          ${{ runner.os }}-se-${{ env.cache-name }}-
+
+    - name: 🛠️ Install tools from .tool-versions
+      if: ${{ steps.cache-asdf.outputs.cache-hit != 'true' }}
+      continue-on-error: true
+      uses: asdf-vm/actions/install@v3
+
+    - name: 📦 Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10 # or the version you use
+
+    - name: 🗂️ Cache pnpm store
+      id: cache-pnpm
+      uses: actions/cache@v4
+      with:
+        path: ~/.pnpm-store
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: 📥 Install dependencies with pnpm
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    # - name: 💎 Generate Prisma models
+    #   shell: bash
+    #   run: pnpm run prisma:generate
