@@ -696,7 +696,7 @@ export class ObjectionClient<
     let numUpdated: number
 
     if (query) {
-      numUpdated = await query.createBuilder().patch(patchWithVersion)
+      numUpdated = await query.createBuilder().patch(patchWithVersion).where(versionColumn, currentVersion as string | number)
     } else {
       const id = this.extractIdentifier(model)
       const idColumns = this.getIdColumns()

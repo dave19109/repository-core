@@ -13,7 +13,7 @@ function isSerializationError(error: unknown): boolean {
   return false
 }
 
-function wrapIfSerializationError(error: unknown): unknown {
+export function wrapIfSerializationError(error: unknown): unknown {
   if (isSerializationError(error)) {
     return new TransactionError('Database transaction conflict (serialization failure or deadlock)', { cause: error })
   }

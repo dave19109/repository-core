@@ -5,6 +5,7 @@ import { GenericOrmRepository } from '../../repository/generic-orm-repository'
 import { withRetry } from '../../concurrency/retry'
 import type { RetryPolicy } from '../../concurrency/retry'
 import { ObjectionClient, type ObjectionQuery } from './object-client'
+import { wrapIfSerializationError } from '../../concurrency/transaction'
 
 /**
  * Query builder and filter APIs use {@link ModelObject}, Objection's row-shaped type: it omits
@@ -43,10 +44,14 @@ export abstract class ObjectionRepository<
   async withTransaction<T>(callback: (txRepo: this) => Promise<T>, retryPolicy?: RetryPolicy): Promise<T> {
     const knex = (this.client as ObjectionClient<M, ModelObject<M>>).getKnex()
 
-    const execute = (): Promise<T> => {
-      return knex.transaction((trx) => {
-        return callback(this.withTrx(trx))
-      })
+    const execute = async (): Promise<T> => {
+      try {
+        return await knex.transaction((trx) => {
+          return callback(this.withTrx(trx))
+        })
+      } catch (error) {
+        throw wrapIfSerializationError(error)
+      }
     }
 
     if (retryPolicy) {
