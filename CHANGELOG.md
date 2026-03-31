@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+### [0.0.4](https://github.com/dave19109/repository-core/compare/v0.0.3...v0.0.4) (2026-03-31)
+
+### Bug Fixes
+
+- model properties ([da1211b](https://github.com/dave19109/repository-core/commit/da1211b04ed9fde71821f2b08ee9626aa4c68dcf))
+- relationships record ([fa04ca1](https://github.com/dave19109/repository-core/commit/fa04ca11eec431e5dc71ab2e5a10d7e22415f008))
+
+### Performance Improvements
+
+- objection adapter ([db41d2d](https://github.com/dave19109/repository-core/commit/db41d2d39bb25dee8d96bf57c67a7f66c9993022))
+
+### Others
+
+- exclude examples in build ([514312f](https://github.com/dave19109/repository-core/commit/514312f58711c069575ace7b8262064179dfbb69))
+
 ### [0.0.3](https://github.com/dave19109/repository-core/compare/v0.0.2...v0.0.3) (2026-03-30)
 
 ### 0.0.2 (2026-03-30)
