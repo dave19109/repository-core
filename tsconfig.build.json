@@ -8,6 +8,7 @@
     "ignoreDeprecations": "6.0"
   },
   "exclude": [
-    "test"
+    "test",
+    "examples"
   ]
 }
